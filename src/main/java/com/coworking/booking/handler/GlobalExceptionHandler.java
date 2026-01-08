@@ -1,35 +1,62 @@
 package com.coworking.booking.handler;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
+import java.time.LocalDateTime;
+import java.util.Map;
+
 @Slf4j
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
-    public String handleBookingError(Exception ex, Model model) {
+    public ResponseEntity<Map<String, Object>> handleBusinessError(Exception ex) {
 
         log.warn("Business error: {}", ex.getMessage());
 
-        model.addAttribute("errorMessage", ex.getMessage());
-
-        return "error/inline-error";
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(errorBody(
+                        HttpStatus.BAD_REQUEST,
+                        ex.getMessage()
+                ));
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)
-    public String handleNotFound(NoHandlerFoundException ex, Model model) {
-        model.addAttribute("errorMessage", "Page not found");
-        return "error/error-page";
+    public ResponseEntity<Map<String, Object>> handleNotFound(NoHandlerFoundException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(errorBody(
+                        HttpStatus.NOT_FOUND,
+                        "Resource not found"
+                ));
     }
 
     @ExceptionHandler(Exception.class)
-    public String handleGeneral(Exception ex, Model model) {
+    public ResponseEntity<Map<String, Object>> handleGeneral(Exception ex) {
+
         log.error("Unexpected error", ex);
-        model.addAttribute("errorMessage", "Unexpected system error");
-        return "error/error-page";
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(errorBody(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        "Unexpected system error"
+                ));
+    }
+
+    private Map<String, Object> errorBody(HttpStatus status, String message) {
+        return Map.of(
+                "timestamp", LocalDateTime.now(),
+                "status", status.value(),
+                "error", status.getReasonPhrase(),
+                "message", message
+        );
     }
 }

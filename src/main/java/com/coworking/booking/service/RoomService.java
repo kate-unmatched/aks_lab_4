@@ -8,10 +8,6 @@ public interface RoomService extends BaseService<Room, Long> {
 
     List<Room> getByWorkspace(Long workspaceId);
 
-    Room create(Room room, Long workspaceId);
-
-    List<Room> getRoomsByWorkspace(Long workspaceId);
-
     Room createRoom(Long workspaceId, Room room);
 
     Room updateRoom(Long workspaceId, Long roomId, Room room);

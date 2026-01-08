@@ -8,8 +8,6 @@ public interface BookingService {
 
     List<Booking> getBookingsByRoom(Long roomId);
 
-    Booking getById(Long id);
-
     Booking create(Long roomId, Booking booking);
 
     void delete(Long bookingId);

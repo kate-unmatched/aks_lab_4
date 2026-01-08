@@ -7,3 +7,5 @@ databaseChangeLog:
       file: db/changelog/003-create-table-bookings.yaml
   - include:
       file: db/changelog/004-insert-initial-data.yaml
+  - include:
+      file: db/changelog/005-create-change-log.yaml

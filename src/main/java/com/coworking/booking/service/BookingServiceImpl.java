@@ -2,31 +2,28 @@ package com.coworking.booking.service;
 
 import com.coworking.booking.entity.Booking;
 import com.coworking.booking.entity.Room;
+import com.coworking.booking.jms.ChangeEventService;
 import com.coworking.booking.repository.BookingRepository;
 import com.coworking.booking.repository.RoomRepository;
-import com.coworking.booking.service.BookingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
     private final RoomRepository roomRepository;
+    private final ChangeEventService changeEventService;
 
     @Override
     public List<Booking> getBookingsByRoom(Long roomId) {
         return bookingRepository.findByRoomId(roomId);
-    }
-
-    @Override
-    public Booking getById(Long id) {
-        return bookingRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Booking not found: " + id));
     }
 
     @Override
@@ -41,24 +38,45 @@ public class BookingServiceImpl implements BookingService {
         }
 
         Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("Room not found: " + roomId));
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Room not found: " + roomId)
+                );
 
         booking.setRoom(room);
 
-        // Проверяем пересечение
+        // Проверяем пересечение бронирований
         if (bookingRepository.existsByRoomIdAndStartTimeLessThanEqualAndEndTimeGreaterThanEqual(
                 roomId,
                 booking.getEndTime(),
                 booking.getStartTime()
         )) {
-            throw new IllegalArgumentException("This time slot is already booked.");
+            throw new IllegalArgumentException("This time slot is already booked");
         }
 
-        return bookingRepository.save(booking);
+        Booking saved = bookingRepository.save(booking);
+
+        changeEventService.sendInsert(
+                "Booking",
+                saved,
+                saved.getId()
+        );
+
+        return saved;
     }
 
     @Override
     public void delete(Long bookingId) {
+
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Booking not found: " + bookingId)
+                );
+
         bookingRepository.deleteById(bookingId);
+
+        changeEventService.sendDelete(
+                "Booking",
+                bookingId
+        );
     }
 }

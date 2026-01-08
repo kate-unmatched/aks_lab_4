@@ -1,4 +1,4 @@
-package com.coworking.booking.controller.rest;
+package com.coworking.booking.controller;
 
 import com.coworking.booking.dto.BookingDto;
 import com.coworking.booking.dto.BookingListDto;
@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor

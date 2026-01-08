@@ -21,7 +21,15 @@ function createWorkspace() {
         });
 }
 
-function updateWorkspace(id) {
+function updateWorkspace() {
+    const container = document.getElementById("workspace-edit");
+    const id = container?.dataset.id;
+
+    if (!id) {
+        alert("Workspace id is missing");
+        return;
+    }
+
     const dto = collectWorkspaceDto();
 
     fetch(`/api/v2/workspaces/${id}`, {
@@ -42,6 +50,7 @@ function updateWorkspace(id) {
             alert("Failed to update workspace");
         });
 }
+
 
 function deleteWorkspace(id) {
     if (!confirm("Are you sure you want to delete this workspace?")) {

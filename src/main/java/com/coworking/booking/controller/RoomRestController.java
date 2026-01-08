@@ -1,4 +1,4 @@
-package com.coworking.booking.controller.rest;
+package com.coworking.booking.controller;
 
 import com.coworking.booking.dto.RoomDto;
 import com.coworking.booking.dto.RoomsListDto;
@@ -6,8 +6,6 @@ import com.coworking.booking.entity.Room;
 import com.coworking.booking.service.RoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor

@@ -1,4 +1,4 @@
-package com.coworking.booking.controller.rest;
+package com.coworking.booking.controller;
 
 import com.coworking.booking.dto.WorkspaceDto;
 import com.coworking.booking.dto.WorkspaceListDto;

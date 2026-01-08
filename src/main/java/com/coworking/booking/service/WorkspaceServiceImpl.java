@@ -1,17 +1,17 @@
 package com.coworking.booking.service;
 
 import com.coworking.booking.entity.Workspace;
+import com.coworking.booking.jms.ChangeEventService;
 import com.coworking.booking.repository.WorkspaceRepository;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 public class WorkspaceServiceImpl extends BaseServiceImpl<Workspace, Long> implements WorkspaceService {
 
-    private final WorkspaceRepository workspaceRepository;
-
-    public WorkspaceServiceImpl(WorkspaceRepository workspaceRepository) {
-        super(workspaceRepository);
-        this.workspaceRepository = workspaceRepository;
+    public WorkspaceServiceImpl(WorkspaceRepository repository, ChangeEventService changeEventService) {
+        super(repository, changeEventService);
     }
 
     @Override
@@ -23,8 +23,25 @@ public class WorkspaceServiceImpl extends BaseServiceImpl<Workspace, Long> imple
         existing.setCapacity(updated.getCapacity());
         existing.setAvailable(updated.getAvailable());
 
-        repository.save(existing);
+        Workspace saved = repository.save(existing);
+
+        changeEventService.sendUpdate(
+                getEntityName(),
+                saved,
+                saved.getId()
+        );
+
         return existing;
+    }
+
+    @Override
+    protected String getEntityName() {
+        return "Workspace";
+    }
+
+    @Override
+    protected Long getEntityId(Workspace entity) {
+        return entity.getId();
     }
 
 }
